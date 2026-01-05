@@ -61,7 +61,7 @@ This document outlines planned improvements and feature enhancements for the thr
 ### Job Chain Support
 - **Objective**: Implement fluent job chaining API similar to C++ async/futures
 - **Requirements**:
-  - Chainable `.then()` API for sequential job dependencies
+  - Chainable `.after()` API for sequential job dependencies
   - Jobs execute only after predecessor jobs complete
   - Automatic dependency resolution
   - Error propagation through chains
@@ -70,21 +70,21 @@ This document outlines planned improvements and feature enhancements for the thr
   ```cpp
   // Fluent chaining API (similar to std::async/promises)
   pool->addJob(task1)
-      .then(task2)
-      .then(task3);
+      .after(task2)
+      .after(task3);
 
   // With error handling
   pool->addJob(task1)
-      .then(task2)
-      .then(task3)
+      .after(task2)
+      .after(task3)
       .onError([](std::exception_ptr e) {
           // Handle errors from any task in chain
       });
 
   // Parallel branching from one task
   auto base = pool->addJob(task1);
-  base.then(task2a);  // Branch 1
-  base.then(task2b);  // Branch 2
+  base.after(task2a);  // Branch 1
+  base.after(task2b);  // Branch 2
   ```
 
 ## Priority Order
