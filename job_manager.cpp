@@ -2,7 +2,7 @@
 
 job_manager::job_manager()
 {
-	_workerWakeUpNotification = nullptr;
+	this->_workerWakeUpNotification = nullptr;
 }
 
 job_manager::~job_manager()
@@ -11,27 +11,27 @@ job_manager::~job_manager()
 
 void job_manager::push_job(std::shared_ptr<job> new_job)
 {
-	std::lock_guard<std::mutex> locker(_job_mutex);
+	std::lock_guard<std::mutex> locker(this->_job_mutex);
 
 	new_job->setJobManager(this->getPtr());
 
-	auto iter = _priority_job_list.find(new_job->getJobPriority());
+	auto iter = this->_priority_job_list.find(new_job->getJobPriority());
 
-	if (iter == _priority_job_list.end())
+	if (iter == this->_priority_job_list.end())
 	{
-		_priority_job_list.insert({ new_job->getJobPriority(), { new_job } });
+		this->_priority_job_list.insert({ new_job->getJobPriority(), { new_job } });
 	}
 	else
 	{
 		iter->second.push_back(new_job);
 	}
 
-	workerWakeUpNotification();
+	this->workerWakeUpNotification();
 }
 
 std::shared_ptr<job> job_manager::pop_job(std::vector<job_priority> job_priorities)
 {
-	std::lock_guard<std::mutex> locker(_job_mutex);
+	std::lock_guard<std::mutex> locker(this->_job_mutex);
 
 	if ((int)job_priorities.size() <= 0)
 	{
@@ -40,9 +40,9 @@ std::shared_ptr<job> job_manager::pop_job(std::vector<job_priority> job_prioriti
 
 	for (int i = 0; i < (int)job_priorities.size(); i++)
 	{
-		auto iter = _priority_job_list.find(job_priorities[i]);
+		auto iter = this->_priority_job_list.find(job_priorities[i]);
 
-		if (iter != _priority_job_list.end())
+		if (iter != this->_priority_job_list.end())
 		{
 			if ((int)iter->second.size() <= 0)
 			{
@@ -61,11 +61,11 @@ std::shared_ptr<job> job_manager::pop_job(std::vector<job_priority> job_prioriti
 
 int job_manager::getAllJobCount()
 {
-	std::lock_guard<std::mutex> locker(_job_mutex);
+	std::lock_guard<std::mutex> locker(this->_job_mutex);
 
 	int count = 0;
 
-	for (auto iter = _priority_job_list.begin(); iter != _priority_job_list.end(); iter++)
+	for (auto iter = this->_priority_job_list.begin(); iter != this->_priority_job_list.end(); iter++)
 	{
 		count += (int)iter->second.size();
 	}
@@ -75,18 +75,18 @@ int job_manager::getAllJobCount()
 
 int job_manager::getJobCount(std::vector<job_priority> job_priorities)
 {
-	std::lock_guard<std::mutex> locker(_job_mutex);
+	std::lock_guard<std::mutex> locker(this->_job_mutex);
 
-	if ((int)_priority_job_list.size() <= 0)
+	if ((int)this->_priority_job_list.size() <= 0)
 	{
 		return 0;
 	}
 
 	for (int i = 0; i < (int)job_priorities.size(); i++)
 	{
-		auto iter = _priority_job_list.find(job_priorities[i]);
+		auto iter = this->_priority_job_list.find(job_priorities[i]);
 
-		if (iter == _priority_job_list.end()) continue;
+		if (iter == this->_priority_job_list.end()) continue;
 		return (int)iter->second.size();
 	}
 
@@ -95,18 +95,18 @@ int job_manager::getJobCount(std::vector<job_priority> job_priorities)
 
 void job_manager::setWorkerNotification(const std::function<void(void)>& workerWakeUpNotification)
 {
-	_workerWakeUpNotification = workerWakeUpNotification;
+	this->_workerWakeUpNotification = workerWakeUpNotification;
 }
 
 void job_manager::workerWakeUpNotification()
 {
-	if (_workerWakeUpNotification != nullptr)
+	if (this->_workerWakeUpNotification != nullptr)
 	{
-		_workerWakeUpNotification();
+		this->_workerWakeUpNotification();
 	}
 }
 
 std::shared_ptr<job_manager> job_manager::getPtr()
 {
-	return shared_from_this();
+	return this->shared_from_this();
 }

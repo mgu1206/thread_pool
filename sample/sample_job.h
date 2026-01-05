@@ -23,17 +23,17 @@ public:
     void work() override
     {
         std::stringstream ss;
-        ss << "[Job #" << _job_id
-           << " '" << _task_name << "' Priority:" << priorityToString(getJobPriority())
+        ss << "[Job #" << this->_job_id
+           << " '" << this->_task_name << "' Priority:" << this->priorityToString(this->getJobPriority())
            << "] Started on thread " << std::this_thread::get_id() << std::endl;
         std::cout << ss.str();
 
         // Simulate work
-        std::this_thread::sleep_for(std::chrono::milliseconds(_work_duration_ms));
+        std::this_thread::sleep_for(std::chrono::milliseconds(this->_work_duration_ms));
 
         ss.str("");
-        ss << "[Job #" << _job_id
-           << " '" << _task_name << "' Priority:" << priorityToString(getJobPriority())
+        ss << "[Job #" << this->_job_id
+           << " '" << this->_task_name << "' Priority:" << this->priorityToString(this->getJobPriority())
            << "] Completed" << std::endl;
         std::cout << ss.str();
     }
