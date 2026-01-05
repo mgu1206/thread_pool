@@ -25,19 +25,28 @@ void thread_worker::startWorker()
 
 	this->_terminated = false;
 
-	this->_worker_thread = std::jthread(&thread_worker::worker_function, this);
+	// Use lambda to properly capture this and pass stop_token
+	this->_worker_thread = std::jthread([this](std::stop_token st) {
+		this->worker_function(st);
+	});
 }
 
 void thread_worker::stopWorker()
 {
-	this->_terminated = true;
-
 	if (this->_worker_thread.joinable())
 	{
-		this->_worker_condition.notify_one();
+		// Request stop first (sets stop_token)
 		this->_worker_thread.request_stop();
+
+		// Wake up the thread if it's waiting on condition variable
+		this->_worker_condition.notify_all();
+
+		// Wait for thread to finish
 		this->_worker_thread.join();
 	}
+
+	// Set flag for compatibility (though stop_token is primary mechanism now)
+	this->_terminated = true;
 }
 
 job_priority thread_worker::getPriority()
@@ -100,14 +109,20 @@ bool thread_worker::checkwakeUpCondition()
 	return manager->getJobCount(this->_job_match_priorities) > 0;
 }
 
-void thread_worker::worker_function()
+void thread_worker::worker_function(std::stop_token stop_token)
 {
-	while (this->_terminated != true)
+	while (!stop_token.stop_requested())
 	{
 		std::shared_ptr<job> cur_job = nullptr;
 
 		std::unique_lock<std::mutex> locker(this->_worker_mutex);
-		this->_worker_condition.wait(locker, [this] {return this->checkwakeUpCondition(); });
+		this->_worker_condition.wait(locker, stop_token, [this] {return this->checkwakeUpCondition(); });
+
+		// Check if stop was requested during wait
+		if (stop_token.stop_requested())
+		{
+			break;
+		}
 
 		std::shared_ptr<job_manager> manager = this->_job_manager.lock();
 
@@ -128,7 +143,7 @@ void thread_worker::worker_function()
 		manager.reset();
 		locker.unlock();
 
-		if (this->_terminated) break;
+		if (stop_token.stop_requested()) break;
 		if (cur_job == nullptr || cur_job.use_count() == 0) continue;
 
 		cur_job->setJobManager(this->_job_manager);

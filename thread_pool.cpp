@@ -121,6 +121,9 @@ void thread_pool::addJob(std::shared_ptr<job> new_job)
 
 void thread_pool::stopPool(bool wait_for_finish_jobs, std::chrono::seconds max_wait_time)
 {
+	// Set terminated flag first to prevent new jobs/workers being added
+	this->_terminated = true;
+
 	if (wait_for_finish_jobs)
 	{
 		auto start_time = std::chrono::steady_clock::now();
@@ -137,6 +140,7 @@ void thread_pool::stopPool(bool wait_for_finish_jobs, std::chrono::seconds max_w
 
 	std::lock_guard<std::mutex> locker(this->_woker_mutex);
 
+	// Stop all workers (request_stop + notify + join)
 	for (int i = 0; i < (int)this->_workers.size(); i++)
 	{
 		if (this->_workers[i] != nullptr)

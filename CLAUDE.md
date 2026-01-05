@@ -120,10 +120,19 @@ public:
 
 ## Modern C++20 Features
 
-The library uses modern C++20 smart pointers for memory safety:
-- **std::jthread**: Thread management with automatic joining and cooperative cancellation
+The library uses modern C++20 features for safety and performance:
+
+### Smart Pointers
+- **std::jthread**: Thread management with automatic joining and cooperative cancellation via `stop_token`
 - **std::unique_ptr<job_data>**: Exclusive ownership of job input data (use `std::move()` when passing)
 - **std::shared_ptr<callback_data>**: Shared ownership of callback data
+
+### Thread Shutdown Mechanism
+Workers use C++20 `std::stop_token` for cooperative cancellation:
+- `condition_variable_any` supports stop tokens for interruptible waits
+- Proper shutdown order: `request_stop()` → `notify_all()` → `join()`
+- Thread pool sets `_terminated` flag before stopping workers to prevent new operations
+- Clean shutdown guaranteed without race conditions
 
 Example creating a job with data:
 ```cpp

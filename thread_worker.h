@@ -22,7 +22,7 @@ private:
 
 	std::jthread _worker_thread;
 	std::mutex _worker_mutex;
-	std::condition_variable _worker_condition;
+	std::condition_variable_any _worker_condition;
 
 	std::weak_ptr<job_manager> _job_manager;
 
@@ -39,6 +39,6 @@ public:
 
 public:
 	void notifyWakeUp();
-	void worker_function();
+	void worker_function(std::stop_token stop_token);
 };
 
