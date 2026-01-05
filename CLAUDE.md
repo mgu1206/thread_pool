@@ -115,6 +115,19 @@ public:
 ## Important Notes
 
 - Always call `thread_pool::setWorkersPriorityNumbers()` after adding/removing workers
-- The library uses raw pointers in some places (`job_data*`, `callback_data*`, `_worker_thread`) - these are planned for modernization to smart pointers
 - When shutting down, use `stopPool(true, timeout)` to wait for jobs to complete
 - Workers automatically start when added to pool via `addWorker()`
+
+## Modern C++20 Features
+
+The library uses modern C++20 smart pointers for memory safety:
+- **std::jthread**: Thread management with automatic joining and cooperative cancellation
+- **std::unique_ptr<job_data>**: Exclusive ownership of job input data (use `std::move()` when passing)
+- **std::shared_ptr<callback_data>**: Shared ownership of callback data
+
+Example creating a job with data:
+```cpp
+auto data = std::make_unique<my_job_data>();
+auto job = std::make_shared<my_custom_job>(job_id, priority, std::move(data), callback);
+pool->addJob(job);
+```

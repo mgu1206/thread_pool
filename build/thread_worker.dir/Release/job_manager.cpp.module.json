@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "thread_worker.dir\\Release\\job_manager.obj",
+            "outputs": [
+                "thread_worker.dir\\Release\\"
+            ],
+            "requires": []
+        }
+    ]
+}

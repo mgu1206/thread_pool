@@ -1,0 +1,5 @@
+D:/private/thread_pool/build/CMakeFiles/thread_worker.dir
+D:/private/thread_pool/build/CMakeFiles/ALL_BUILD.dir
+D:/private/thread_pool/build/CMakeFiles/ZERO_CHECK.dir
+D:/private/thread_pool/build/sample/CMakeFiles/sample.dir
+D:/private/thread_pool/build/sample/CMakeFiles/ALL_BUILD.dir

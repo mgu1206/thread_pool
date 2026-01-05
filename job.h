@@ -22,17 +22,17 @@ public:
 	job(unsigned long long job_id);
 	job(unsigned long long job_id, const std::function<void(std::vector<unsigned char >)>& job_callback);
 	job(unsigned long long job_id, job_priority job_priority, const std::function<void(std::vector<unsigned char >)>& job_callback);
-	job(unsigned long long job_id, job_data* job_data, const std::function<void(std::vector<unsigned char >)>& job_callback);
-	job(unsigned long long job_id, job_priority job_priority, job_data* job_data, const std::function<void(std::vector<unsigned char >)>& job_callback);
+	job(unsigned long long job_id, std::unique_ptr<job_data>&& job_data, const std::function<void(std::vector<unsigned char >)>& job_callback);
+	job(unsigned long long job_id, job_priority job_priority, std::unique_ptr<job_data>&& job_data, const std::function<void(std::vector<unsigned char >)>& job_callback);
 	job(const std::function<void(std::vector<unsigned char >)>& job_callback);
 	job(job_priority job_priority, const std::function<void(std::vector<unsigned char >)>& job_callback);
 
-	job(unsigned long long job_id, const std::function<void(callback_data*)>& job_callback);
-	job(unsigned long long job_id, job_priority job_priority, const std::function<void(callback_data*)>& job_callback);
-	job(unsigned long long job_id, job_data* job_data, const std::function<void(callback_data*)>& job_callback);
-	job(unsigned long long job_id, job_priority job_priority, job_data* job_data, const std::function<void(callback_data*)>& job_callback);
-	job(const std::function<void(callback_data*)>& job_callback);
-	job(job_priority job_priority, const std::function<void(callback_data*)>& job_callback);
+	job(unsigned long long job_id, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(unsigned long long job_id, job_priority job_priority, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(unsigned long long job_id, std::unique_ptr<job_data>&& job_data, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(unsigned long long job_id, job_priority job_priority, std::unique_ptr<job_data>&& job_data, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(job_priority job_priority, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
 
 	virtual ~job();
 
@@ -41,7 +41,7 @@ public:
 
 public:
 	void setJobId(const unsigned long long job_id);
-	void setJobData(job_data* job_data);
+	void setJobData(std::unique_ptr<job_data>&& job_data);
 	void setJobPriority(job_priority job_priority);
 
 public:
@@ -59,13 +59,13 @@ public:
 	virtual void work() = 0;
 
 private:
-	job_data* _job_data;
+	std::unique_ptr<job_data> _job_data;
 	job_priority _job_priority;
 
 	std::weak_ptr<job_manager> _job_manager;
 
 public:
 	std::function<void(std::vector<unsigned char >)> _job_callback_1;
-	std::function<void(callback_data*)> _job_callback_2;
+	std::function<void(std::shared_ptr<callback_data>)> _job_callback_2;
 };
 

@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/private/thread_pool/build/cmake_install.cmake",
+		"D:/private/thread_pool/build/sample/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

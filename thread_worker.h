@@ -20,7 +20,7 @@ private:
 	std::vector<job_priority> _job_match_priorities;
 	std::atomic_bool _terminated;
 
-	std::thread* _worker_thread;
+	std::jthread _worker_thread;
 	std::mutex _worker_mutex;
 	std::condition_variable _worker_condition;
 

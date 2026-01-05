@@ -4,7 +4,6 @@ thread_worker::thread_worker(job_priority job_priority)
 {
 	this->_terminated = false;
 	this->_job_priority = job_priority;
-	this->_worker_thread = nullptr;
 
 	this->setJobMatchPriorities();
 }
@@ -26,17 +25,18 @@ void thread_worker::startWorker()
 
 	this->_terminated = false;
 
-	this->_worker_thread = new std::thread(&thread_worker::worker_function, this);
+	this->_worker_thread = std::jthread(&thread_worker::worker_function, this);
 }
 
 void thread_worker::stopWorker()
 {
 	this->_terminated = true;
 
-	if (this->_worker_thread != nullptr && this->_worker_thread->joinable() == true)
+	if (this->_worker_thread.joinable())
 	{
 		this->_worker_condition.notify_one();
-		this->_worker_thread->join();
+		this->_worker_thread.request_stop();
+		this->_worker_thread.join();
 	}
 }
 
