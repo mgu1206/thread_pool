@@ -59,17 +59,32 @@ This document outlines planned improvements and feature enhancements for the thr
   - More intuitive API
 
 ### Job Chain Support
-- **Objective**: Implement job chaining capabilities to define dependent task sequences
+- **Objective**: Implement fluent job chaining API similar to C++ async/futures
 - **Requirements**:
-  - Define jobs that execute only after predecessor jobs complete
-  - Support both linear chains and DAG (Directed Acyclic Graph) dependencies
+  - Chainable `.then()` API for sequential job dependencies
+  - Jobs execute only after predecessor jobs complete
   - Automatic dependency resolution
   - Error propagation through chains
+  - Return value passing between chained jobs
 - **Usage Example**:
   ```cpp
-  auto job1 = pool->addJob(task1);
-  auto job2 = pool->addJobAfter(job1, task2);
-  auto job3 = pool->addJobAfter(job2, task3);
+  // Fluent chaining API (similar to std::async/promises)
+  pool->addJob(task1)
+      .then(task2)
+      .then(task3);
+
+  // With error handling
+  pool->addJob(task1)
+      .then(task2)
+      .then(task3)
+      .onError([](std::exception_ptr e) {
+          // Handle errors from any task in chain
+      });
+
+  // Parallel branching from one task
+  auto base = pool->addJob(task1);
+  base.then(task2a);  // Branch 1
+  base.then(task2b);  // Branch 2
   ```
 
 ## Priority Order
