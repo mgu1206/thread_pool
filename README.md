@@ -199,6 +199,22 @@ int getAllJobCount();
 int getJobCount(std::vector<job_priority> job_priorities);
 ```
 
+## Future Updates
+
+The following improvements are planned for future releases:
+
+### Code Modernization
+
+- **Remove raw pointer usage** - Eliminate all raw pointers in favor of smart pointers
+- **Modern C++ improvements** - Update codebase to fully utilize modern C++ features and best practices
+- **Replace class-based data structures** - Use `std::variant` and `std::monostate` instead of inheritance-based `job_data` and `callback_data` classes for better type safety and performance
+
+### Feature Enhancements
+
+- **Watchdog for starvation prevention** - Implement watchdog mechanism to detect and prevent job starvation
+- **Lambda job support** - Add support for lambda functions as jobs for easier inline task definition
+- **Job chain support** - Implement job chaining capabilities to define dependent task sequences
+
 ## License
 
 This project is provided as-is for educational and commercial use.
