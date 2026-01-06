@@ -2,9 +2,8 @@
 #include <memory>
 
 #include "sample_job.h"
-
-#include "../thread_pool.h"
-#include "../thread_worker.h"
+#include "thread_pool.h"
+#include "thread_worker.h"
 
 void printSeparator(const std::string& title)
 {

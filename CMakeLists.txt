@@ -30,17 +30,17 @@ endif()
 
 # Set source files thread_worker
 set(THREAD_WORKER_HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/callback_data.h
-    ${CMAKE_CURRENT_LIST_DIR}/job.h
-    ${CMAKE_CURRENT_LIST_DIR}/job_data.h
-    ${CMAKE_CURRENT_LIST_DIR}/job_manager.h
-    ${CMAKE_CURRENT_LIST_DIR}/thread_pool.h
-    ${CMAKE_CURRENT_LIST_DIR}/thread_worker.h)
+    ${CMAKE_CURRENT_LIST_DIR}/src/callback_data.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/job.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/job_data.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/job_manager.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/thread_pool.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/thread_worker.h)
 
 set(THREAD_WORKER_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/job.cpp ${CMAKE_CURRENT_LIST_DIR}/job_manager.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/thread_pool.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/thread_worker.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/src/job.cpp ${CMAKE_CURRENT_LIST_DIR}/src/job_manager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/thread_pool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/thread_worker.cpp)
 
 # Add source file to the target
 target_sources(${PROJECT_NAME} PRIVATE ${THREAD_WORKER_HEADERS}
@@ -48,7 +48,7 @@ target_sources(${PROJECT_NAME} PRIVATE ${THREAD_WORKER_HEADERS}
 
 # Set include directories for the library
 target_include_directories(${PROJECT_NAME}
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # Add sample subdirectory

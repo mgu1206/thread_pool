@@ -8,9 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Sample executable
 add_executable(sample sample.cpp)
 
-# Include parent directory for header files
-target_include_directories(sample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
-
 # Link with thread_worker library
 target_link_libraries(sample PRIVATE thread_worker)
 
