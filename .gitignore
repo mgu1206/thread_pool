@@ -3,3 +3,6 @@ build/
 
 # Claude Code configuration
 .claude/
+
+# VS Code
+.vscode/
