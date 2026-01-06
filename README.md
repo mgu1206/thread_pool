@@ -69,7 +69,8 @@ cmake --build . --config Release
 
 This will build:
 - `thread_worker` - Static library
-- `sample` - Sample executable demonstrating library usage (in `sample/` subdirectory)
+- `sample` - Sample executable demonstrating inheritance-based jobs (in `sample/` subdirectory)
+- `sample_lambda` - Sample executable demonstrating lambda-based jobs (in `sample/` subdirectory)
 
 ### Building Only the Library
 
@@ -82,9 +83,11 @@ cmake ..
 cmake --build . --target thread_worker
 ```
 
-## Running the Sample
+## Running the Samples
 
-After building, run the sample executable from the build directory:
+After building, run the sample executables from the build directory:
+
+### Traditional Inheritance Pattern Sample
 
 ```bash
 # macOS / Linux
@@ -94,6 +97,18 @@ cd build
 # Windows
 cd build
 .\sample\Release\sample.exe
+```
+
+### Lambda Jobs Sample
+
+```bash
+# macOS / Linux
+cd build
+./sample/sample_lambda
+
+# Windows
+cd build
+.\sample\Release\sample_lambda.exe
 ```
 
 ## Usage Example
@@ -136,6 +151,45 @@ int main()
 
 ## Creating Custom Jobs
 
+### Option 1: Lambda Jobs (C++20) - Recommended for Simple Tasks
+
+Create jobs directly with lambda functions without inheritance:
+
+```cpp
+auto pool = std::make_shared<thread_pool>();
+auto worker = std::make_shared<thread_worker>(job_priority::NORMAL_PRIORITY);
+pool->addWorker(worker);
+pool->setWorkersPriorityNumbers();
+
+// Simple lambda job
+auto job = std::make_shared<job>(
+    1,                              // job_id
+    job_priority::HIGH_PRIORITY,    // priority
+    []() {                          // work lambda
+        std::cout << "Task executed!" << std::endl;
+    }
+);
+
+pool->addJob(job);
+```
+
+Lambda jobs support captures for accessing external data:
+
+```cpp
+std::atomic<int> counter{0};
+
+auto job = std::make_shared<job>(
+    2,
+    job_priority::NORMAL_PRIORITY,
+    [&counter]() {  // Capture counter by reference
+        counter++;
+        std::cout << "Counter: " << counter << std::endl;
+    }
+);
+```
+
+### Option 2: Class Inheritance - For Complex Jobs
+
 Inherit from the `job` base class and implement the `work()` method:
 
 ```cpp
@@ -143,7 +197,7 @@ class my_custom_job : public job
 {
 public:
     my_custom_job(unsigned long long job_id, job_priority priority)
-        : job(job_id, priority, [](callback_data*) {})
+        : job(job_id, priority, [](std::shared_ptr<callback_data>) {})
     {
     }
 

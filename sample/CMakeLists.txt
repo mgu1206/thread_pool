@@ -31,3 +31,30 @@ endif()
 if(UNIX)
   target_link_libraries(sample PRIVATE pthread)
 endif()
+
+# Lambda sample executable
+add_executable(sample_lambda sample_lambda.cpp)
+
+# Link with thread_worker library
+target_link_libraries(sample_lambda PRIVATE thread_worker)
+
+# Platform-specific compiler options
+if(MSVC)
+  target_compile_options(
+    sample_lambda
+    PRIVATE /EHsc # Enable C++ exception handling
+            /W3 # Set warning level to 3
+  )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(
+    sample_lambda
+    PRIVATE -Wall # Enable most warnings
+            -Wextra # Enable extra warnings
+            -Wpedantic # Strict ISO C++ compliance warnings
+  )
+endif()
+
+# Link pthread on Unix-like systems
+if(UNIX)
+  target_link_libraries(sample_lambda PRIVATE pthread)
+endif()

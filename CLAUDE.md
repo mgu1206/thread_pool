@@ -94,23 +94,71 @@ This ensures high-priority jobs get processed quickly while preventing starvatio
 
 ## Creating Custom Jobs
 
-Inherit from `job` base class and implement the pure virtual `work()` method:
+### Lambda Jobs (C++20) - Recommended
+
+Create jobs directly with lambda functions for simple, inline tasks:
+
+```cpp
+// Basic lambda job
+auto job = std::make_shared<job>(
+    1,                              // job_id
+    job_priority::NORMAL_PRIORITY,  // priority
+    []() {                          // work lambda
+        std::cout << "Processing task..." << std::endl;
+    }
+);
+pool->addJob(job);
+
+// Lambda with captures
+std::atomic<int> counter{0};
+auto capture_job = std::make_shared<job>(
+    2,
+    job_priority::HIGH_PRIORITY,
+    [&counter]() {
+        counter++;
+        std::cout << "Counter: " << counter << std::endl;
+    }
+);
+pool->addJob(capture_job);
+
+// Minimal lambda job (auto job_id = 0, default priority = NORMAL)
+auto simple_job = std::make_shared<job>([]() {
+    std::cout << "Simple task!" << std::endl;
+});
+pool->addJob(simple_job);
+```
+
+### Class Inheritance - For Complex Jobs
+
+Inherit from `job` base class and implement the `work()` method for complex, multi-step operations:
 
 ```cpp
 class my_custom_job : public job
 {
 public:
     my_custom_job(unsigned long long job_id, job_priority priority)
-        : job(job_id, priority, [](callback_data*) {})
+        : job(job_id, priority, [](std::shared_ptr<callback_data>) {})
     {
     }
 
     void work() override
     {
         // Your job logic here
+        step1();
+        step2();
+        step3();
     }
+
+private:
+    void step1() { /* ... */ }
+    void step2() { /* ... */ }
+    void step3() { /* ... */ }
 };
 ```
+
+**When to use each approach:**
+- **Lambda jobs**: Simple tasks, inline logic, quick prototyping, capturing external variables
+- **Class inheritance**: Complex multi-step operations, reusable job types, jobs with significant state
 
 ## Important Notes
 

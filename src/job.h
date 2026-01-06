@@ -34,6 +34,26 @@ public:
 	job(const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
 	job(job_priority job_priority, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
 
+	// Lambda-based constructors
+	job(unsigned long long job_id, std::function<void()> work_func);
+	job(unsigned long long job_id, job_priority job_priority, std::function<void()> work_func);
+	job(unsigned long long job_id, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func);
+	job(unsigned long long job_id, job_priority job_priority, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func);
+	job(std::function<void()> work_func);
+	job(job_priority job_priority, std::function<void()> work_func);
+
+	// Lambda + callback_1 (binary) constructors
+	job(unsigned long long job_id, std::function<void()> work_func, const std::function<void(std::vector<unsigned char>)>& job_callback);
+	job(unsigned long long job_id, job_priority job_priority, std::function<void()> work_func, const std::function<void(std::vector<unsigned char>)>& job_callback);
+	job(unsigned long long job_id, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func, const std::function<void(std::vector<unsigned char>)>& job_callback);
+	job(unsigned long long job_id, job_priority job_priority, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func, const std::function<void(std::vector<unsigned char>)>& job_callback);
+
+	// Lambda + callback_2 (structured) constructors
+	job(unsigned long long job_id, std::function<void()> work_func, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(unsigned long long job_id, job_priority job_priority, std::function<void()> work_func, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(unsigned long long job_id, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+	job(unsigned long long job_id, job_priority job_priority, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func, const std::function<void(std::shared_ptr<callback_data>)>& job_callback);
+
 	virtual ~job();
 
 	unsigned long long _job_id;
@@ -56,13 +76,16 @@ public:
 	std::shared_ptr<job> getPtr();
 
 public:
-	virtual void work() = 0;
+	virtual void work();
 
 private:
 	std::unique_ptr<job_data> _job_data;
 	job_priority _job_priority;
 
 	std::weak_ptr<job_manager> _job_manager;
+
+	// Lambda work function storage
+	std::function<void()> _work_function;
 
 public:
 	std::function<void(std::vector<unsigned char >)> _job_callback_1;

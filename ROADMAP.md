@@ -45,18 +45,38 @@ This document outlines planned improvements and feature enhancements for the thr
   - Implement dynamic priority boosting for starved jobs
   - Configurable starvation threshold
 
-### Lambda Job Support
-- **Objective**: Add support for lambda functions as jobs for easier inline task definition
-- **Usage Example**:
+### ✅ Lambda Job Support (COMPLETED)
+- **Status**: ✅ Completed
+- **Changes Made**:
+  - Added `std::function<void()> _work_function` member to job class
+  - Made `work()` method virtual (non-pure) with default implementation
+  - Added 14 new lambda-accepting constructors to job class
+  - Created `sample_lambda.cpp` demonstration file
+- **Usage Examples**:
   ```cpp
-  pool->addJob([](){
+  // Basic lambda job
+  auto job = std::make_shared<job>(1, job_priority::NORMAL_PRIORITY, []() {
       std::cout << "Lambda job executed!" << std::endl;
-  }, job_priority::NORMAL_PRIORITY);
+  });
+  pool->addJob(job);
+
+  // Lambda with captures
+  std::atomic<int> counter{0};
+  auto capture_job = std::make_shared<job>(2, job_priority::HIGH_PRIORITY, [&counter]() {
+      counter++;
+  });
+  pool->addJob(capture_job);
+
+  // Minimal lambda (auto job_id, default priority)
+  auto simple = std::make_shared<job>([]() { std::cout << "Simple!" << std::endl; });
+  pool->addJob(simple);
   ```
 - **Benefits**:
-  - Eliminate need to create custom job classes for simple tasks
-  - Reduce boilerplate code
-  - More intuitive API
+  - Eliminates need to create custom job classes for simple tasks
+  - Reduces boilerplate code significantly
+  - More intuitive and modern C++20 API
+  - Supports lambda captures for accessing external state
+  - Maintains full backwards compatibility with inheritance pattern
 
 ### Job Chain Support
 - **Objective**: Implement fluent job chaining API similar to C++ async/futures
@@ -90,13 +110,25 @@ This document outlines planned improvements and feature enhancements for the thr
 ## Priority Order
 
 1. ~~**High Priority**: Remove raw pointer usage (improves safety and RAII compliance)~~ ✅ **COMPLETED**
-2. **High Priority**: Lambda job support (immediate usability improvement)
+2. ~~**High Priority**: Lambda job support (immediate usability improvement)~~ ✅ **COMPLETED**
 3. **Medium Priority**: Modern C++ improvements (incremental quality improvements)
 4. **Medium Priority**: Job chain support (significant feature addition)
 5. **Low Priority**: Replace class-based data structures (optimization, requires major refactoring)
 6. **Low Priority**: Watchdog for starvation prevention (nice-to-have for specific use cases)
 
 ## Completed Features
+
+### Lambda Job Support (v3.0)
+**Completed**: 2026-01-06
+
+Lambda functions can now be used directly as jobs without inheritance:
+- Added `std::function<void()>` work function storage to job class
+- Made `work()` virtual with default lambda invocation
+- 14 new constructors supporting lambda + optional callbacks/job_data
+- Full backwards compatibility with existing inheritance pattern
+- Sample demonstration in `sample/sample_lambda.cpp`
+
+**Benefits**: Reduced boilerplate, modern C++20 API, improved developer experience.
 
 ### Raw Pointer Elimination (v2.0)
 **Completed**: 2026-01-06
