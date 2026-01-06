@@ -82,15 +82,19 @@ int job_manager::getJobCount(std::vector<job_priority> job_priorities)
 		return 0;
 	}
 
+	int total_count = 0;
+
 	for (int i = 0; i < (int)job_priorities.size(); i++)
 	{
 		auto iter = this->_priority_job_list.find(job_priorities[i]);
 
-		if (iter == this->_priority_job_list.end()) continue;
-		return (int)iter->second.size();
+		if (iter != this->_priority_job_list.end())
+		{
+			total_count += (int)iter->second.size();
+		}
 	}
 
-	return 0;
+	return total_count;
 }
 
 void job_manager::setWorkerNotification(const std::function<void(void)>& workerWakeUpNotification)
