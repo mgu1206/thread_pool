@@ -13,14 +13,15 @@ A C++20 thread pool library implementing priority-based job scheduling with work
 ## Project Structure
 
 ```
-thread_worker/
+thread_pool/
 ├── CMakeLists.txt           # Main build configuration
-├── callback_data.{h,cpp}    # Job callback data
-├── job.{h,cpp}              # Abstract job base class
-├── job_data.h               # Job input data base class
-├── job_manager.{h,cpp}      # Job queue management
-├── thread_pool.{h,cpp}      # Thread pool manager
-├── thread_worker.{h,cpp}    # Worker thread implementation
+├── src/                     # Library source code
+│   ├── callback_data.{h,cpp}    # Job callback data
+│   ├── job.{h,cpp}              # Abstract job base class
+│   ├── job_data.h               # Job input data base class
+│   ├── job_manager.{h,cpp}      # Job queue management
+│   ├── thread_pool.{h,cpp}      # Thread pool manager
+│   └── thread_worker.{h,cpp}    # Worker thread implementation
 └── sample/                  # Sample application
     ├── CMakeLists.txt       # Sample build configuration
     ├── sample.cpp           # Sample application code
