@@ -58,3 +58,57 @@ endif()
 if(UNIX)
   target_link_libraries(sample_lambda PRIVATE pthread)
 endif()
+
+# Future sample executable
+add_executable(future_sample future_sample.cpp)
+
+# Link with thread_worker library
+target_link_libraries(future_sample PRIVATE thread_worker)
+
+# Platform-specific compiler options
+if(MSVC)
+  target_compile_options(
+    future_sample
+    PRIVATE /EHsc # Enable C++ exception handling
+            /W3 # Set warning level to 3
+  )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(
+    future_sample
+    PRIVATE -Wall # Enable most warnings
+            -Wextra # Enable extra warnings
+            -Wpedantic # Strict ISO C++ compliance warnings
+  )
+endif()
+
+# Link pthread on Unix-like systems
+if(UNIX)
+  target_link_libraries(future_sample PRIVATE pthread)
+endif()
+
+# Return values test executable
+add_executable(test_return_values test_return_values.cpp)
+
+# Link with thread_worker library
+target_link_libraries(test_return_values PRIVATE thread_worker)
+
+# Platform-specific compiler options
+if(MSVC)
+  target_compile_options(
+    test_return_values
+    PRIVATE /EHsc # Enable C++ exception handling
+            /W3 # Set warning level to 3
+  )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(
+    test_return_values
+    PRIVATE -Wall # Enable most warnings
+            -Wextra # Enable extra warnings
+            -Wpedantic # Strict ISO C++ compliance warnings
+  )
+endif()
+
+# Link pthread on Unix-like systems
+if(UNIX)
+  target_link_libraries(test_return_values PRIVATE pthread)
+endif()
