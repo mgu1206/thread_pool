@@ -62,8 +62,8 @@ cmake --build . --target thread_worker
   - Raw pointer `_worker_thread` (planned for smart pointer migration)
 
 - **job** - Abstract base class for work units
-  - Pure virtual `work()` method must be implemented by subclasses
-  - Supports two callback signatures: `std::vector<unsigned char>` or `callback_data*`
+  - Virtual `work()` method can be overridden by subclasses or defined via lambda
+  - Supports lambda-based inline work functions for simple tasks
   - Holds optional `job_data*` for input (raw pointer, planned for std::variant migration)
 
 ### Priority Matching System
@@ -137,8 +137,9 @@ class my_custom_job : public job
 {
 public:
     my_custom_job(unsigned long long job_id, job_priority priority)
-        : job(job_id, priority, [](std::shared_ptr<callback_data>) {})
+        : job(job_id)
     {
+        setJobPriority(priority);
     }
 
     void work() override
@@ -173,7 +174,6 @@ The library uses modern C++20 features for safety and performance:
 ### Smart Pointers
 - **std::jthread**: Thread management with automatic joining and cooperative cancellation via `stop_token`
 - **std::unique_ptr<job_data>**: Exclusive ownership of job input data (use `std::move()` when passing)
-- **std::shared_ptr<callback_data>**: Shared ownership of callback data
 
 ### Thread Shutdown Mechanism
 Workers use C++20 `std::stop_token` for cooperative cancellation:
@@ -185,6 +185,11 @@ Workers use C++20 `std::stop_token` for cooperative cancellation:
 Example creating a job with data:
 ```cpp
 auto data = std::make_unique<my_job_data>();
-auto job = std::make_shared<my_custom_job>(job_id, priority, std::move(data), callback);
+auto job = std::make_shared<job>(
+    job_id,
+    job_priority::HIGH_PRIORITY,
+    std::move(data),
+    []() { /* work logic using data */ }
+);
 pool->addJob(job);
 ```

@@ -14,10 +14,11 @@ public:
                job_priority priority,
                const std::string& task_name,
                int work_duration_ms = 100)
-        : job(job_id, priority, [](std::shared_ptr<callback_data>) {})
+        : job(job_id)
         , _task_name(task_name)
         , _work_duration_ms(work_duration_ms)
     {
+        setJobPriority(priority);
     }
 
     void work() override
