@@ -30,9 +30,7 @@ endif()
 
 # Set source files thread_worker
 set(THREAD_WORKER_HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/src/callback_data.h
     ${CMAKE_CURRENT_LIST_DIR}/src/job.h
-    ${CMAKE_CURRENT_LIST_DIR}/src/job_data.h
     ${CMAKE_CURRENT_LIST_DIR}/src/job_manager.h
     ${CMAKE_CURRENT_LIST_DIR}/src/thread_pool.h
     ${CMAKE_CURRENT_LIST_DIR}/src/thread_worker.h)

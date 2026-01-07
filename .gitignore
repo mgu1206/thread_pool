@@ -6,3 +6,7 @@ build/
 
 # VS Code
 .vscode/
+
+.DS_Store
+project.pbxproj
+WorkspaceSettings.xcsettings

@@ -4,8 +4,6 @@
 #include <vector>
 #include <functional>
 
-#include "job_data.h"
-
 enum job_priority
 {
 	HIGH_PRIORITY,
@@ -23,8 +21,6 @@ public:
 	// Lambda-based constructors
 	job(unsigned long long job_id, std::function<void()> work_func);
 	job(unsigned long long job_id, job_priority job_priority, std::function<void()> work_func);
-	job(unsigned long long job_id, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func);
-	job(unsigned long long job_id, job_priority job_priority, std::unique_ptr<job_data>&& job_data, std::function<void()> work_func);
 	job(std::function<void()> work_func);
 	job(job_priority job_priority, std::function<void()> work_func);
 
@@ -35,12 +31,10 @@ public:
 
 public:
 	void setJobId(const unsigned long long job_id);
-	void setJobData(std::unique_ptr<job_data>&& job_data);
 	void setJobPriority(job_priority job_priority);
 
 public:
 	unsigned long long getJobId();
-	job_data* getJobData();
 	job_priority getJobPriority();
 
 public:
@@ -53,7 +47,6 @@ public:
 	virtual void work();
 
 private:
-	std::unique_ptr<job_data> _job_data;
 	job_priority _job_priority;
 
 	std::weak_ptr<job_manager> _job_manager;

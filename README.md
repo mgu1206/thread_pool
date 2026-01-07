@@ -18,7 +18,6 @@ thread_pool/
 ├── src/                     # Library source code
 │   ├── callback_data.{h,cpp}    # Job callback data
 │   ├── job.{h,cpp}              # Abstract job base class
-│   ├── job_data.h               # Job input data base class
 │   ├── job_manager.{h,cpp}      # Job queue management
 │   ├── thread_pool.{h,cpp}      # Thread pool manager
 │   └── thread_worker.{h,cpp}    # Worker thread implementation
@@ -34,7 +33,6 @@ thread_pool/
 - `thread_worker` - Individual worker threads with priority affinity
 - `job_manager` - Job queue management with priority queues
 - `job` - Abstract base class for jobs (inherit to create custom jobs)
-- `job_data` - Base class for job input data
 - `callback_data` - Base class for job callback data
 
 ## Building
@@ -262,7 +260,7 @@ The following improvements are planned for future releases:
 
 - **Remove raw pointer usage** - Eliminate all raw pointers in favor of smart pointers
 - **Modern C++ improvements** - Update codebase to fully utilize modern C++ features and best practices
-- **Replace class-based data structures** - Use `std::variant` and `std::monostate` instead of inheritance-based `job_data` and `callback_data` classes for better type safety and performance
+- **Replace class-based data structures** - Use `std::variant` and `std::monostate` instead of inheritance-based `callback_data` classes for better type safety and performance
 
 ### Feature Enhancements
 
