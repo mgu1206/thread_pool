@@ -6,9 +6,11 @@ A C++20 thread pool library implementing priority-based job scheduling with work
 
 - **Priority-based job scheduling** (HIGH, NORMAL, LOW)
 - **Flexible worker configuration** - Workers can be configured to handle specific priority jobs
+- **Lambda job support** - Create jobs inline without inheritance using C++20 lambda functions
+- **Future-based async execution** - Submit tasks and get results via `std::future` with full type safety
 - **Cross-platform support** - Windows (MSVC), macOS (Clang), Linux (GCC)
 - **Thread-safe** - Uses mutexes and condition variables for synchronization
-- **Smart pointer based** - Modern C++ memory management
+- **Smart pointer based** - Modern C++ memory management with smart pointers throughout
 
 ## Project Structure
 
@@ -16,24 +18,25 @@ A C++20 thread pool library implementing priority-based job scheduling with work
 thread_pool/
 ├── CMakeLists.txt           # Main build configuration
 ├── src/                     # Library source code
-│   ├── callback_data.{h,cpp}    # Job callback data
 │   ├── job.{h,cpp}              # Abstract job base class
 │   ├── job_manager.{h,cpp}      # Job queue management
 │   ├── thread_pool.{h,cpp}      # Thread pool manager
 │   └── thread_worker.{h,cpp}    # Worker thread implementation
-└── sample/                  # Sample application
-    ├── CMakeLists.txt       # Sample build configuration
-    ├── sample.cpp           # Sample application code
-    └── sample_job.h         # Sample job implementation
+└── sample/                  # Sample applications
+    ├── CMakeLists.txt           # Sample build configuration
+    ├── sample.cpp               # Traditional inheritance-based jobs
+    ├── sample_lambda.cpp        # Lambda-based jobs
+    ├── future_sample.cpp        # Future-based async job submission
+    ├── test_return_values.cpp   # Return value handling
+    └── sample_job.h             # Sample job implementation
 ```
 
 ## Components
 
-- `thread_pool` - Main thread pool manager
+- `thread_pool` - Main thread pool manager with support for lambda jobs and future-based async execution
 - `thread_worker` - Individual worker threads with priority affinity
 - `job_manager` - Job queue management with priority queues
-- `job` - Abstract base class for jobs (inherit to create custom jobs)
-- `callback_data` - Base class for job callback data
+- `job` - Abstract base class for jobs (supports both inheritance and lambda-based jobs)
 
 ## Building
 
@@ -67,8 +70,10 @@ cmake --build . --config Release
 
 This will build:
 - `thread_worker` - Static library
-- `sample` - Sample executable demonstrating inheritance-based jobs (in `sample/` subdirectory)
-- `sample_lambda` - Sample executable demonstrating lambda-based jobs (in `sample/` subdirectory)
+- `sample` - Sample executable demonstrating inheritance-based jobs
+- `sample_lambda` - Sample executable demonstrating lambda-based jobs
+- `future_sample` - Sample executable demonstrating future-based async job submission
+- `test_return_values` - Sample executable demonstrating return value handling
 
 ### Building Only the Library
 
@@ -89,59 +94,111 @@ After building, run the sample executables from the build directory:
 
 ```bash
 # macOS / Linux
-cd build
-./sample/sample
+./build/sample/sample
 
 # Windows
-cd build
-.\sample\Release\sample.exe
+.\build\sample\Release\sample.exe
 ```
 
 ### Lambda Jobs Sample
 
 ```bash
 # macOS / Linux
-cd build
-./sample/sample_lambda
+./build/sample/sample_lambda
 
 # Windows
-cd build
-.\sample\Release\sample_lambda.exe
+.\build\sample\Release\sample_lambda.exe
 ```
 
-## Usage Example
+### Future-Based Async Job Submission Sample
+
+```bash
+# macOS / Linux
+./build/sample/future_sample
+
+# Windows
+.\build\sample\Release\future_sample.exe
+```
+
+### Return Values Test Sample
+
+```bash
+# macOS / Linux
+./build/sample/test_return_values
+
+# Windows
+.\build\sample\Release\test_return_values.exe
+```
+
+## Usage Examples
+
+### Simple Lambda Job Example
 
 ```cpp
 #include "thread_pool.h"
 #include "thread_worker.h"
-#include "sample_job.h"
 
 int main()
 {
     // Create thread pool
     auto pool = std::make_shared<thread_pool>();
 
-    // Add workers with different priorities
+    // Add workers
     auto worker = std::make_shared<thread_worker>(job_priority::NORMAL_PRIORITY);
     pool->addWorker(worker);
-
     pool->setWorkersPriorityNumbers();
 
-    // Create and add jobs
-    auto job = std::make_shared<sample_job>(
+    // Create and add a lambda job
+    auto job = std::make_shared<::job>(
         1,                              // job_id
         job_priority::NORMAL_PRIORITY,  // priority
-        "MyTask",                       // task name
-        200                             // work duration in ms
+        []() {                          // work lambda
+            std::cout << "Task executed!" << std::endl;
+        }
     );
-
     pool->addJob(job);
 
-    // Wait for completion
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    // Shutdown and wait for completion
+    pool->stopPool(true);
+
+    return 0;
+}
+```
+
+### Future-Based Async Execution Example
+
+```cpp
+#include "thread_pool.h"
+#include "thread_worker.h"
+
+int main()
+{
+    // Create thread pool
+    auto pool = std::make_shared<thread_pool>();
+
+    // Add workers
+    for (int i = 0; i < 2; i++)
+    {
+        auto worker = std::make_shared<thread_worker>(job_priority::NORMAL_PRIORITY);
+        pool->addWorker(worker);
+    }
+    pool->setWorkersPriorityNumbers();
+
+    // Submit a task and get a future
+    auto future = pool->submit(
+        job_priority::NORMAL_PRIORITY,
+        [](int a, int b) {
+            return a + b;
+        },
+        21,
+        21
+    );
+
+    // Wait for result and print
+    std::cout << "Result: " << future.get() << std::endl;
 
     // Shutdown pool
-    pool->stopPool(true, std::chrono::seconds(5));
+    pool->stopPool(true);
 
     return 0;
 }
@@ -149,7 +206,9 @@ int main()
 
 ## Creating Custom Jobs
 
-### Option 1: Lambda Jobs (C++20) - Recommended for Simple Tasks
+There are three ways to create and execute jobs:
+
+### Option 1: Lambda Jobs - Recommended for Simple Tasks
 
 Create jobs directly with lambda functions without inheritance:
 
@@ -160,14 +219,13 @@ pool->addWorker(worker);
 pool->setWorkersPriorityNumbers();
 
 // Simple lambda job
-auto job = std::make_shared<job>(
+auto job = std::make_shared<::job>(
     1,                              // job_id
     job_priority::HIGH_PRIORITY,    // priority
     []() {                          // work lambda
         std::cout << "Task executed!" << std::endl;
     }
 );
-
 pool->addJob(job);
 ```
 
@@ -176,7 +234,7 @@ Lambda jobs support captures for accessing external data:
 ```cpp
 std::atomic<int> counter{0};
 
-auto job = std::make_shared<job>(
+auto job = std::make_shared<::job>(
     2,
     job_priority::NORMAL_PRIORITY,
     [&counter]() {  // Capture counter by reference
@@ -184,9 +242,52 @@ auto job = std::make_shared<job>(
         std::cout << "Counter: " << counter << std::endl;
     }
 );
+pool->addJob(job);
 ```
 
-### Option 2: Class Inheritance - For Complex Jobs
+**Simplified constructors** are also available:
+
+```cpp
+// Auto job_id = 0, default priority = NORMAL
+auto simple_job = std::make_shared<::job>([]() {
+    std::cout << "Simple task!" << std::endl;
+});
+pool->addJob(simple_job);
+
+// Specify priority only
+auto priority_job = std::make_shared<::job>(
+    job_priority::HIGH_PRIORITY,
+    []() { std::cout << "High priority task!" << std::endl; }
+);
+pool->addJob(priority_job);
+```
+
+### Option 2: Future-Based Async Execution - For Getting Return Values
+
+Use the `submit()` method to execute tasks and get results via `std::future`:
+
+```cpp
+// Submit with priority
+auto future = pool->submit(
+    job_priority::HIGH_PRIORITY,
+    [](int a, int b) {
+        return a * b;
+    },
+    6,
+    7
+);
+
+std::cout << "Result: " << future.get() << std::endl;  // Output: 42
+
+// Submit with default normal priority
+auto future2 = pool->submit([]() {
+    return "Hello from thread pool!";
+});
+
+std::string result = future2.get();
+```
+
+### Option 3: Class Inheritance - For Complex Jobs
 
 Inherit from the `job` base class and implement the `work()` method:
 
@@ -195,8 +296,9 @@ class my_custom_job : public job
 {
 public:
     my_custom_job(unsigned long long job_id, job_priority priority)
-        : job(job_id, priority, [](std::shared_ptr<callback_data>) {})
+        : job(job_id)
     {
+        setJobPriority(priority);
     }
 
     void work() override
@@ -205,6 +307,10 @@ public:
         std::cout << "Doing work..." << std::endl;
     }
 };
+
+// Usage
+auto job = std::make_shared<my_custom_job>(1, job_priority::HIGH_PRIORITY);
+pool->addJob(job);
 ```
 
 ## Priority Scheduling
@@ -226,12 +332,24 @@ The thread pool supports three priority levels:
 ### thread_pool
 
 ```cpp
+// Worker management
 void addWorker(std::shared_ptr<thread_worker> worker);
 void removeWorker(std::shared_ptr<thread_worker> worker);
-void addJob(std::shared_ptr<job> new_job);
-void stopPool(bool wait_for_finish_jobs = false, std::chrono::seconds max_wait_time = std::chrono::seconds(0));
-int getWorkerNumbers();
 void setWorkersPriorityNumbers();
+int getWorkerNumbers();
+
+// Job submission
+void addJob(std::shared_ptr<job> new_job);
+
+// Future-based async execution (returns std::future)
+template <typename F, typename... Args>
+auto submit(F&& func, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>;
+
+template <typename F, typename... Args>
+auto submit(job_priority priority, F&& func, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>;
+
+// Pool control
+void stopPool(bool wait_for_finish_jobs = false, std::chrono::seconds max_wait_time = std::chrono::seconds(0));
 ```
 
 ### thread_worker
@@ -252,21 +370,29 @@ int getAllJobCount();
 int getJobCount(std::vector<job_priority> job_priorities);
 ```
 
-## Future Updates
+## Recent Updates
+
+### Completed Features
+
+- ✅ **Lambda job support** - Full support for lambda functions as jobs without requiring inheritance
+- ✅ **Future-based async execution** - Added `submit()` method that returns `std::future` for getting task results
+- ✅ **Simplified API** - Removed legacy `callback_data` and `job_data` classes for cleaner, more intuitive interface
+- ✅ **Multiple sample applications** - Comprehensive examples demonstrating different usage patterns
+
+## Future Enhancements
 
 The following improvements are planned for future releases:
 
 ### Code Modernization
 
-- **Remove raw pointer usage** - Eliminate all raw pointers in favor of smart pointers
-- **Modern C++ improvements** - Update codebase to fully utilize modern C++ features and best practices
-- **Replace class-based data structures** - Use `std::variant` and `std::monostate` instead of inheritance-based `callback_data` classes for better type safety and performance
+- **Remove raw pointer usage** - Eliminate remaining raw pointers in favor of smart pointers
+- **Modern C++ improvements** - Continue updating codebase to fully utilize C++20 features and best practices
 
 ### Feature Enhancements
 
 - **Watchdog for starvation prevention** - Implement watchdog mechanism to detect and prevent job starvation
-- **Lambda job support** - Add support for lambda functions as jobs for easier inline task definition
 - **Job chain support** - Implement job chaining capabilities to define dependent task sequences
+- **Enhanced exception handling** - Improve error handling and reporting throughout the library
 
 ## License
 
